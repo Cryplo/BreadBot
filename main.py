@@ -576,7 +576,7 @@ client.load_extension("cogs.game")
 
 
 
-
+ 
 keep_alive()
 
 client.run(os.getenv('TOKEN'))
