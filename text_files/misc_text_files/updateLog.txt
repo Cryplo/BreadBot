@@ -17,3 +17,5 @@ You can trade up to 9 cards at a time now, for example [.bread trade baba, arepa
 Rewriting code (actually this time)
 **11/23/2021**
 Removed Trade and Quest commands, since they were poorly designed but got a lot of commands to work with cogs. I will try to simplify the code even more later so it's more effective.
+**11/24/2021**
+Thanks to Saph#6803, the code is now a lot more clean
