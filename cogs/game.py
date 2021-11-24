@@ -1,10 +1,11 @@
 import random
 import time
 from collections import Counter
-
+import math
 import discord
 from discord.ext import commands
-
+from collections import OrderedDict
+from operator import getitem
 import config
 from functions import *
 
@@ -480,6 +481,41 @@ class Game(commands.Cog):
             embed = discord.Embed(description="Please enter a non-negative integer to bet", colour=0xff1100)
 
             await ctx.send(embed=embed)
+    @commands.command(name="leaderboard")
+    async def leaderboard(self,ctx):
+      global common_pantry
+      global rare_pantry
+      global mythical_pantry
+      global legendary_pantry
+      global pantry
+      leaderboard = []
+      for document in collection.find():
+        pantry = document["pantry"]
+        common_pantry = []
+        rare_pantry = []
+        mythical_pantry = []
+        legendary_pantry = []
+        for x in pantry:
+          if x in common_bread:
+              common_pantry.append(x)
+          elif x in rare_bread:
+              rare_pantry.append(x)
+          elif x in mythical_bread:
+              mythical_pantry.append(x)
+          elif x in legendary_bread:
+              legendary_pantry.append(x)
+        networth = len(common_pantry) * 500 + len(rare_pantry) * 2500 + len(mythical_pantry) * 6000 + len(legendary_pantry) * 20000
+        document.update({"networth":networth+document["grain"]})
+        leaderboard.append(document)
+      leaderboard.sort(key=lambda e: e['networth'], reverse = True)
+      sending_string = ""
+      for n in range(0,10):
+        user = await self.client.fetch_user(leaderboard[n]["_id"])
+        sending_string += user.name+": "+str(leaderboard[n]['networth'])+"\n"
+      embed = discord.Embed(title="Global Leaderboard by Networth",
+          description=sending_string,
+          colour=0x0dff00)
+      await ctx.send(embed=embed)
 
 
 def setup(client):
