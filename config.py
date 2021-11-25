@@ -25,3 +25,5 @@ common_bread, rare_bread, mythical_bread, legendary_bread = map(bread_file_to_li
 
 pantry_limit = 1000
 bake_cooldown = 600
+#Make sure adds up to 1,000
+bake_percents = [650,300,45,5]

@@ -18,7 +18,7 @@ legendary_bread = config.legendary_bread
 updateLog = config.updateLog
 helpContent = config.helpContent
 faqContent = config.faqContent
-
+bakePercents = config.bake_percents
 
 async def initCommand(ctx):
     global myquery
@@ -99,28 +99,28 @@ class Game(commands.Cog):
         if time.time() - card_cooldown >= config.bake_cooldown and len(pantry) < pantry_limit:
             ran_card_category = random.randint(1, 1000)
             # Common Card Baked
-            if ran_card_category > 0 and ran_card_category <= 700:
+            if ran_card_category <= bakePercents[0]:
                 card_category = "common"
                 card = common_bread[random.randint(0, len(common_bread) - 1)]
                 embed = discord.Embed(description="Congratulations, you baked a " + card + ". This card is a common",
                                       colour=0x808080)
                 await ctx.send(embed=embed)
             # Rare Card Baked
-            if ran_card_category > 700 and ran_card_category <= 975:
+            elif ran_card_category <= bakePercents[0]+bakePercents[1]:
                 card = rare_bread[random.randint(0, len(rare_bread) - 1)]
                 card_category = "rare"
                 embed = discord.Embed(description="Congratulations, you baked a " + card + ". This card is a rare",
                                       colour=0x0073ff)
                 await ctx.send(embed=embed)
             # Mythical Card Baked
-            if ran_card_category > 975 and ran_card_category <= 997:
+            elif ran_card_category <= bakePercents[0]+bakePercents[2]+bakePercents[3]:
                 card = mythical_bread[random.randint(0, len(mythical_bread) - 1)]
                 card_category = "mythical"
                 embed = discord.Embed(description="Congratulations, you baked a " + card + ". This card is a mythical",
                                       colour=0xb700ff)
                 await ctx.send(embed=embed)
             # Legendary Card Baked
-            if ran_card_category > 997 and ran_card_category <= 1000:
+            else:
                 card = legendary_bread[random.randint(0, len(legendary_bread) - 1)]
                 card_category = "legendary"
                 embed = discord.Embed(
