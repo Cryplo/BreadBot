@@ -50,6 +50,8 @@ async def initCommand(ctx):
     global simplified_mythical_pantry
     global simplified_legendary_pantry
     global quest_cooldown
+    global chests
+    global hourly_cooldown
     collection.update_one({"_id": ctx.author.id}, {"$set": {"name": ctx.author.name}})
     for result in user:
         pantry = result["pantry"]
@@ -66,6 +68,16 @@ async def initCommand(ctx):
             collection.update_one({"_id": ctx.author.id}, {"$set": {"quest_cooldown": 0}})
             quest = []
             quest_cooldown = 0
+        if "chests" in document.keys():
+            chests = result["chests"]
+        if "chests" not in document.keys():
+            db_set(ctx.author.id,"chests",{"1st":0,"2nd":0,"3rd":0,"4th":0,"5th":0})
+            chests = result["chests"]
+        if "hourly_cooldown" in document.keys():
+            hourly_cooldown = result["hourly_cooldown"]
+        if "chests" not in document.keys():
+            db_set(ctx.author.id,"hourly_cooldown",0)
+            hourly_cooldown = result["hourly_cooldown"]
     common_pantry = []
     rare_pantry = []
     mythical_pantry = []
@@ -113,14 +125,14 @@ class Game(commands.Cog):
                                       colour=0x0073ff)
                 await ctx.send(embed=embed)
             # Mythical Card Baked
-            elif ran_card_category <= bakePercents[0]+bakePercents[2]+bakePercents[3]:
+            elif ran_card_category <= bakePercents[0]+bakePercents[1]+bakePercents[2]:
                 card = mythical_bread[random.randint(0, len(mythical_bread) - 1)]
                 card_category = "mythical"
                 embed = discord.Embed(description="Congratulations, you baked a " + card + ". This card is a mythical",
                                       colour=0xb700ff)
                 await ctx.send(embed=embed)
             # Legendary Card Baked
-            else:
+            elif ran_card_category:
                 card = legendary_bread[random.randint(0, len(legendary_bread) - 1)]
                 card_category = "legendary"
                 embed = discord.Embed(
@@ -485,8 +497,8 @@ class Game(commands.Cog):
       global legendary_pantry
       global pantry
       leaderboard = []
-      for document in collection.find():
-        pantry = document["pantry"]
+      for doc in collection.find():
+        pantry = doc["pantry"]
         common_pantry = []
         rare_pantry = []
         mythical_pantry = []
@@ -501,8 +513,8 @@ class Game(commands.Cog):
           elif x in legendary_bread:
               legendary_pantry.append(x)
         networth = len(common_pantry) * 1000 + len(rare_pantry) * 5000 + len(mythical_pantry) * 12000 + len(legendary_pantry) * 40000
-        document.update({"networth":networth+document["grain"]})
-        leaderboard.append(document)
+        doc.update({"networth":networth+doc["grain"]})
+        leaderboard.append(doc)
       leaderboard.sort(key=lambda e: e['networth'], reverse = True)
       sending_string = ""
       for n in range(0,10):
@@ -512,6 +524,26 @@ class Game(commands.Cog):
           description=sending_string,
           colour=0x0dff00)
       await ctx.send(embed=embed)
+    @commands.command(name="open")
+    async def open_chest(self,ctx,tier:int):
+      await initCommand(ctx)
+      chest_cards = {}
+      if tier == 5:
+        if chests["5th"]>0:
+          chest_cards.update({rare_bread[random.randint(0, len(rare_bread) - 1)]:"rare"})
+          chest_cards.update({common_bread[random.randint(0, len(common_bread) - 1)]:"common"})
+          chest_cards.update({common_bread[random.randint(0, len(common_bread) - 1)]:"common"})
+          for n in chest_cards:
+            db_push(ctx.author.id,"pantry",n)
+          embed = discord.Embed(title=ctx.author.name+"'s fifth tier chest has been opened!",description="It contains:\n**"+list(chest_cards.keys())[0]+"**: "+list(chest_cards.values())[0]+"\n**"+list(chest_cards.keys())[1]+"**: "+list(chest_cards.values())[1]+"\n**"+list(chest_cards.keys())[2]+"**: "+list(chest_cards.values())[2])
+          db_set(ctx.author.id,"chests.5th",chests["5th"]-1)
+          await ctx.send(embed=embed)
+    @commands.command(name="chests")
+    async def show_chests(self,ctx):
+      await initCommand(ctx)
+      embed= discord.Embed(title=ctx.author.name+"'s' chests", description = "1st Tier Chests: "+str(chests["1st"])+"\n2nd Tier Chests: "+str(chests["2nd"])+"\n3rd Tier Chests: "+str(chests["3rd"])+"\n4th Tier Chests: "+str(chests["4th"])+"\n5th Tier Chests: "+str(chests["5th"]))
+      await ctx.send(embed=embed)
+
 
 
 def setup(client):
