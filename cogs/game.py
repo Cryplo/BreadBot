@@ -489,41 +489,6 @@ class Game(commands.Cog):
             embed = discord.Embed(description="Please enter a non-negative integer to bet", colour=0xff1100)
 
             await ctx.send(embed=embed)
-    @commands.command(name="leaderboard")
-    async def leaderboard(self,ctx):
-      global common_pantry
-      global rare_pantry
-      global mythical_pantry
-      global legendary_pantry
-      global pantry
-      leaderboard = []
-      for doc in collection.find():
-        pantry = doc["pantry"]
-        common_pantry = []
-        rare_pantry = []
-        mythical_pantry = []
-        legendary_pantry = []
-        for x in pantry:
-          if x in common_bread:
-              common_pantry.append(x)
-          elif x in rare_bread:
-              rare_pantry.append(x)
-          elif x in mythical_bread:
-              mythical_pantry.append(x)
-          elif x in legendary_bread:
-              legendary_pantry.append(x)
-        networth = len(common_pantry) * 1000 + len(rare_pantry) * 5000 + len(mythical_pantry) * 12000 + len(legendary_pantry) * 40000
-        doc.update({"networth":networth+doc["grain"]})
-        leaderboard.append(doc)
-      leaderboard.sort(key=lambda e: e['networth'], reverse = True)
-      sending_string = ""
-      for n in range(0,10):
-        user = await self.client.fetch_user(leaderboard[n]["_id"])
-        sending_string += user.name+": "+str(f"{leaderboard[n]['networth']:,}")+"\n"
-      embed = discord.Embed(title="Global Leaderboard By Networth",
-          description=sending_string,
-          colour=0x0dff00)
-      await ctx.send(embed=embed)
     @commands.command(name="open")
     async def open_chest(self,ctx,tier:int):
       await initCommand(ctx)
