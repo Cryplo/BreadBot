@@ -108,7 +108,8 @@ class Game(commands.Cog):
     async def bake(self, ctx):
         await initCommand(ctx)
         # Checks to make sure baking meets requirements
-        if time.time() - card_cooldown >= config.bake_cooldown and len(pantry) < pantry_limit:
+        if time.time() - card_cooldown > config.bake_cooldown and len(pantry) < pantry_limit:
+            db_set(ctx.author.id, "card_cooldown", time.time())
             ran_card_category = random.randint(1, 1000)
             # Common Card Baked
             if ran_card_category <= bakePercents[0]:
@@ -139,10 +140,10 @@ class Game(commands.Cog):
                     description="Congratulations, you baked a " + card + ". This card is a LEGENDARY!", colour=0xfbff00)
                 await ctx.send(embed=embed)
             db_push(ctx.author.id, "pantry", card)
-            db_set(ctx.author.id, "card_cooldown", time.time())
+            
             return
             # Cooldown Time
-        if time.time() - card_cooldown < config.bake_cooldown:
+        if time.time() - card_cooldown <= config.bake_cooldown:
             delay_left = config.bake_cooldown - (time.time() - card_cooldown)
             embed = discord.Embed(
                 description='You have ' + convert(delay_left) + ' left until you can use this command again',
@@ -229,36 +230,35 @@ class Game(commands.Cog):
     async def farm(self, ctx):
         await initCommand(ctx)
         global grain
-        global farm_cooldown
         jackpot = random.randint(1, 100)
         if time.time() - farm_cooldown > 10 and jackpot < 90:
+            db_set(ctx.author.id, "farm_cooldown", time.time())
             grain_gained = random.randint(10, 25)
-            farm_cooldown = time.time()
             grain = grain + grain_gained
             embed = discord.Embed(description='You gained ' + str(grain_gained) + ' pieces of grain', colour=0x0dff00)
             await ctx.send(embed=embed)
             db_set(ctx.author.id, "grain", grain)
-            db_set(ctx.author.id, "farm_cooldown", farm_cooldown)
+            
             return
         if time.time() - farm_cooldown > 10 and jackpot >= 90 and jackpot < 99:
+            db_set(ctx.author.id, "farm_cooldown", time.time())
             grain_gained = random.randint(35, 65)
-            farm_cooldown = time.time()
+
             grain = grain + grain_gained
             embed = discord.Embed(description='Mini Jackpot! You gained ' + str(grain_gained) + ' pieces of grain',
                                   colour=0x0dff00)
             await ctx.send(embed=embed)
             db_set(ctx.author.id, "grain", grain)
-            db_set(ctx.author.id, "farm_cooldown", farm_cooldown)
+            
             return
         if time.time() - farm_cooldown > 10 and jackpot >= 99:
+            db_set(ctx.author.id, "farm_cooldown", time.time())
             grain_gained = random.randint(110, 140)
-            farm_cooldown = time.time()
             grain = grain + grain_gained
             embed = discord.Embed(description='HUGE JACKPOT!!! You gained ' + str(grain_gained) + ' pieces of grain',
                                   colour=0x0dff00)
             await ctx.send(embed=embed)
             db_set(ctx.author.id, "grain", grain)
-            db_set(ctx.author.id, "farm_cooldown", farm_cooldown)
             return
         else:
             farm_delay_left = 10 - (int(time.time()) - int(farm_cooldown))
