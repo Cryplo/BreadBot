@@ -23,9 +23,4 @@ def count_duplicates(x, array):
     return x
 
 
-def db_push(id, key, value):
-    collection.update_one({"_id": id}, {"$push": {key: value}})
 
-
-def db_set(id, key, value):
-    collection.update_one({"_id": id}, {"$set": {key: value}})

@@ -1,0 +1,102 @@
+
+    @commands.command(name="sell")
+    async def sell(self, ctx, *, sell_input):
+        global grain
+        await initCommand(ctx)
+        selling_cards = []
+        if sell_input in pantry:
+            if sell_input in common_pantry:
+                pantry.remove(sell_input)
+                grain = grain + 500
+                embed = discord.Embed(title=sell_input + " has been sold!",
+                                      description=sell_input + " has been sold for 500 grain", colour=0x0dff00)
+                await ctx.send(embed=embed)
+            if sell_input in rare_pantry:
+                pantry.remove(sell_input)
+                grain = grain + 2500
+                embed = discord.Embed(title=sell_input + " has been sold!",
+                                      description=sell_input + " has been sold for 2500 grain", colour=0x0dff00)
+                await ctx.send(embed=embed)
+            if sell_input in mythical_pantry:
+                pantry.remove(sell_input)
+                grain = grain + 6000
+                embed = discord.Embed(title=sell_input + " has been sold!",
+                                      description=sell_input + " has been sold for 6000 grain", colour=0x0dff00)
+                await ctx.send(embed=embed)
+            if sell_input in legendary_pantry:
+                pantry.remove(sell_input)
+                grain = grain + 20000
+                embed = discord.Embed(title=sell_input + " has been sold!",
+                                      description=sell_input + " has been sold for 20000 grain", colour=0x0dff00)
+                await ctx.send(embed=embed)
+            db_set(ctx.author.id, "pantry", pantry)
+            db_set(ctx.author.id, "grain", grain)
+            return
+        if sell_input == 'all':
+            collection.update_one({"_id": ctx.author.id}, {"$set": {"pantry": []}})
+            grain_gained = len(common_pantry) * 500 + len(rare_pantry) * 2500 + len(mythical_pantry) * 6000 + len(
+                legendary_pantry) * 20000
+            collection.update_one({"_id": ctx.author.id}, {"$set": {"grain": grain + grain_gained}})
+
+            embed = discord.Embed(title="You have sold your entire pantry",
+                                  description="You have sold your entire pantry and gained " + str(
+                                      grain_gained) + " grain", colour=0x0dff00)
+            await ctx.send(embed=embed)
+            return
+        if sell_input == "commons":
+            collection.update_one({"_id": ctx.author.id},
+                                  {"$set": {"pantry": [x for x in pantry if x not in common_pantry]}})
+
+            grain_gained = len(common_pantry) * 500
+
+            collection.update_one({"_id": ctx.author.id}, {"$set": {"grain": grain + grain_gained}})
+
+            embed = discord.Embed(title="You have sold all your common cards",
+                                  description="You have sold all your common cards and gained " + str(
+                                      grain_gained) + " grain", colour=0x0dff00)
+            await ctx.send(embed=embed)
+            return
+
+        if sell_input == "rares":
+            collection.update_one({"_id": ctx.author.id},
+                                  {"$set": {"pantry": [x for x in pantry if x not in rare_pantry]}})
+
+            grain_gained = len(rare_pantry) * 2500
+
+            collection.update_one({"_id": ctx.author.id}, {"$set": {"grain": grain + grain_gained}})
+
+            embed = discord.Embed(title="You have sold all your rare cards",
+                                  description="You have sold all your rare cards and gained " + str(
+                                      grain_gained) + " grain", colour=0x0dff00)
+            await ctx.send(embed=embed)
+            return
+
+        if sell_input == "mythicals":
+            collection.update_one({"_id": ctx.author.id},
+                                  {"$set": {"pantry": [x for x in pantry if x not in mythical_pantry]}})
+
+            grain_gained = len(mythical_pantry) * 12000
+
+            collection.update_one({"_id": ctx.author.id}, {"$set": {"grain": grain + grain_gained}})
+
+            embed = discord.Embed(title="You have sold all your mythical cards",
+                                  description="You have sold all your mythical cards and gained " + str(
+                                      grain_gained) + " grain", colour=0x0dff00)
+            await ctx.send(embed=embed)
+            return
+
+        if sell_input == "legendaries":
+            collection.update_one({"_id": ctx.author.id},
+                                  {"$set": {"pantry": [x for x in pantry if x not in legendary_pantry]}})
+
+            grain_gained = len(legendary_pantry) * 40000
+
+            collection.update_one({"_id": ctx.author.id}, {"$set": {"grain": grain + grain_gained}})
+
+            embed = discord.Embed(title="You have sold all your legendary cards",
+                                  description="You have sold all your legendary cards and gained " + str(
+                                      grain_gained) + " grain", colour=0x0dff00)
+            await ctx.send(embed=embed)
+            return
+        else:
+            await ctx.send("You either don't have this item or it doesn't exist")
