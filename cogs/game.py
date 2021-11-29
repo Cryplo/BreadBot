@@ -59,31 +59,32 @@ async def initCommand(ctx):
     global chests
     global hourly_cooldown
     collection.update_one({"_id": ctx.author.id}, {"$set": {"name": ctx.author.name}})
+    document = collection.find_one(myquery)
     for result in user:
-        pantry = result["pantry"]
-        card_cooldown = result["card_cooldown"]
-        farm_cooldown = result["farm_cooldown"]
-        grain = int(result["grain"])
-        document = collection.find_one(myquery)
-        if "quest" in document.keys():
-            # for result in user:
-            quest = result["quest"]
-            quest_cooldown = result["quest_cooldown"]
-        if "quest" not in document.keys():
-            collection.update_one({"_id": ctx.author.id}, {"$set": {"quest": []}})
-            collection.update_one({"_id": ctx.author.id}, {"$set": {"quest_cooldown": 0}})
-            quest = []
-            quest_cooldown = 0
-        if "chests" in document.keys():
-            chests = result["chests"]
-        if "chests" not in document.keys():
-            await db_set(ctx.author.id,"chests",{"1st":0,"2nd":0,"3rd":0,"4th":0,"5th":0})
-            chests = result["chests"]
-        if "hourly_cooldown" in document.keys():
-            hourly_cooldown = result["hourly_cooldown"]
-        if "chests" not in document.keys():
-            await db_set(ctx.author.id,"hourly_cooldown",0)
-            hourly_cooldown = result["hourly_cooldown"]
+      pantry = result["pantry"]
+      card_cooldown = result["card_cooldown"]
+      farm_cooldown = result["farm_cooldown"]
+      grain = int(result["grain"])
+      
+      if "quest" in document.keys():
+          # for result in user:
+          quest = result["quest"]
+          quest_cooldown = result["quest_cooldown"]
+      if "quest" not in document.keys():
+          collection.update_one({"_id": ctx.author.id}, {"$set": {"quest": []}})
+          collection.update_one({"_id": ctx.author.id}, {"$set": {"quest_cooldown": 0}})
+          quest = []
+          quest_cooldown = 0
+      if "chests" in document.keys():
+          chests = result["chests"]
+      if "chests" not in document.keys():
+          await db_set(ctx.author.id,"chests",{"1st":0,"2nd":0,"3rd":0,"4th":0,"5th":0})
+          chests = result["chests"]
+      if "hourly_cooldown" in document.keys():
+          hourly_cooldown = result["hourly_cooldown"]
+      if "hourly_cooldown" not in document.keys():
+          collection.update_one({"_id": ctx.author.id}, {"$set": {"hourly_cooldown": 0}})
+          hourly_cooldown = 0
     common_pantry = []
     rare_pantry = []
     mythical_pantry = []
@@ -395,10 +396,10 @@ class Game(commands.Cog):
 
             await ctx.send(embed=embed)
     @commands.command(name="open")
-    async def open_chest(self,ctx,tier:int):
+    async def open_chest(self,ctx,tier:str):
       await initCommand(ctx)
       chest_cards = {}
-      if tier == 5:
+      if tier == '5' or tier == '5th':
         if chests["5th"]>0:
           chest_cards.update({rare_bread[random.randint(0, len(rare_bread) - 1)]:"rare"})
           chest_cards.update({common_bread[random.randint(0, len(common_bread) - 1)]:"common"})
@@ -413,8 +414,21 @@ class Game(commands.Cog):
       await initCommand(ctx)
       embed= discord.Embed(title=ctx.author.name+"'s' chests", description = "1st Tier Chests: "+str(chests["1st"])+"\n2nd Tier Chests: "+str(chests["2nd"])+"\n3rd Tier Chests: "+str(chests["3rd"])+"\n4th Tier Chests: "+str(chests["4th"])+"\n5th Tier Chests: "+str(chests["5th"]))
       await ctx.send(embed=embed)
-
-
+    @commands.command(name="hourly")
+    async def claim_hourly(self,ctx):
+      await initCommand(ctx)
+      if time.time() - hourly_cooldown > 3600:
+        await db_set(ctx.author.id,"hourly_cooldown",time.time())
+        await db_set(ctx.author.id,"chests.5th",chests["5th"]+1)
+        embed= discord.Embed(title=ctx.author.name+"'s' hourly rewards:", description = "A 5th Tier Chest")
+        await ctx.send(embed = embed)
+      else:
+        delay_left = 3600 - (time.time() - hourly_cooldown)
+        embed = discord.Embed(
+            description='You have ' + convert(delay_left) + ' left until you can use this command again',
+            colour=0xff1100)
+        await ctx.send(embed=embed)
+        
 
 def setup(client):
     client.add_cog(Game(client))
