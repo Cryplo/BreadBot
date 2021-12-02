@@ -402,7 +402,11 @@ class Game(commands.Cog):
       if tier == '5' or tier == '5th':
         if chests["5th"]>0:
           chest_cards.update({rare_bread[random.randint(0, len(rare_bread) - 1)]:"rare"})
-          chest_cards.update({common_bread[random.randint(0, len(common_bread) - 1)]:"common"})
+          randomnum = random.randint(1,100)
+          if randomnum <= 7:
+            chest_cards.update({mythical_bread[random.randint(0, len(mythical_bread) - 1)]:"mythical"})
+          else:
+            chest_cards.update({common_bread[random.randint(0, len(common_bread) - 1)]:"common"})
           chest_cards.update({common_bread[random.randint(0, len(common_bread) - 1)]:"common"})
           for n in chest_cards:
             await db_push(ctx.author.id,"pantry",n)
