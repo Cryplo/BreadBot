@@ -58,6 +58,7 @@ async def initCommand(ctx):
     global quest_cooldown
     global chests
     global hourly_cooldown
+    global daily_cooldown
     collection.update_one({"_id": ctx.author.id}, {"$set": {"name": ctx.author.name}})
     document = collection.find_one(myquery)
     for result in user:
@@ -85,6 +86,11 @@ async def initCommand(ctx):
       if "hourly_cooldown" not in document.keys():
           collection.update_one({"_id": ctx.author.id}, {"$set": {"hourly_cooldown": 0}})
           hourly_cooldown = 0
+      if "daily_cooldown" in document.keys():
+          daily_cooldown = result["daily_cooldown"]
+      if "daily_cooldown" not in document.keys():
+          collection.update_one({"_id": ctx.author.id}, {"$set": {"daily_cooldown": 0}})
+          daily_cooldown = 0
     common_pantry = []
     rare_pantry = []
     mythical_pantry = []
@@ -414,6 +420,21 @@ class Game(commands.Cog):
           embed = discord.Embed(title=ctx.author.name+"'s fifth tier chest has been opened!",description="It contains:\n**"+list(chest_cards.keys())[0]+"**: "+list(chest_cards.values())[0]+"\n**"+list(chest_cards.keys())[1]+"**: "+list(chest_cards.values())[1]+"\n**"+list(chest_cards.keys())[2]+"**: "+list(chest_cards.values())[2])
           await db_set(ctx.author.id,"chests.5th",chests["5th"]-1)
           await ctx.send(embed=embed)
+      if tier == '4' or tier == '4th':
+        if chests["4th"]>0:
+          randomnum = random.randint(1,100)
+          if randomnum <= 15:
+            chest_cards.update({mythical_bread[random.randint(0, len(mythical_bread) - 1)]:"mythical"})
+          else:
+            chest_cards.update({rare_bread[random.randint(0, len(rare_bread) - 1)]:"rare"})
+          chest_cards.update({rare_bread[random.randint(0, len(rare_bread) - 1)]:"rare"})
+          chest_cards.update({common_bread[random.randint(0, len(common_bread) - 1)]:"common"})
+          chest_cards.update({common_bread[random.randint(0, len(common_bread) - 1)]:"common"})
+          for n in chest_cards:
+            await db_push(ctx.author.id,"pantry",n)
+          embed = discord.Embed(title=ctx.author.name+"'s fourth tier chest has been opened!",description="It contains:\n**"+list(chest_cards.keys())[0]+"**: "+list(chest_cards.values())[0]+"\n**"+list(chest_cards.keys())[1]+"**: "+list(chest_cards.values())[1]+"\n**"+list(chest_cards.keys())[2]+"**: "+list(chest_cards.values())[2]+"\n**"+list(chest_cards.keys())[3]+"**: "+list(chest_cards.values())[3])
+          await db_set(ctx.author.id,"chests.4th",chests["4th"]-1)
+          await ctx.send(embed=embed)
     @commands.command(name="chests")
     async def show_chests(self,ctx):
       await initCommand(ctx)
@@ -429,6 +450,20 @@ class Game(commands.Cog):
         await ctx.send(embed = embed)
       else:
         delay_left = 3600 - (time.time() - hourly_cooldown)
+        embed = discord.Embed(
+            description='You have ' + convert(delay_left) + ' left until you can use this command again',
+            colour=0xff1100)
+        await ctx.send(embed=embed)
+    @commands.command(name="daily")
+    async def claim_daily(self,ctx):
+      await initCommand(ctx)
+      if time.time() - daily_cooldown > 86400:
+        await db_set(ctx.author.id,"daily_cooldown",time.time())
+        await db_set(ctx.author.id,"chests.4th",chests["4th"]+1)
+        embed= discord.Embed(title=ctx.author.name+"'s' hourly rewards:", description = "A 4th Tier Chest")
+        await ctx.send(embed = embed)
+      else:
+        delay_left = 86400 - (time.time() - daily_cooldown)
         embed = discord.Embed(
             description='You have ' + convert(delay_left) + ' left until you can use this command again',
             colour=0xff1100)
