@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands
-
+import random
 import config
 
 
@@ -31,6 +31,37 @@ class Misc(commands.Cog):
     async def faq(self, ctx):
         embed = discord.Embed(description=config.faqContent, colour=0x000000)
         await ctx.send(embed=embed)
+    @commands.command(name="guess")
+    async def guess(self,ctx):
+      await ctx.send('Guess a number between 1 and 10.')
+
+      def is_correct(m):
+          return m.author == ctx.author and m.content.isdigit()
+
+      answer = random.randint(1, 10)
+      correct = False
+      while correct == False:
+        guess = await self.client.wait_for('message', check=is_correct)
+
+
+        if int(guess.content) == answer:
+          await ctx.send('You are right!')
+          correct = True
+        else:
+          await ctx.send('Oops. Guess Again.')
+
+    @commands.command(name="thumb")
+    async def thumb(self,ctx):
+      await ctx.send('Send me that 👍 reaction, mate')
+
+      def check(reaction, user):
+          return user == ctx.author
+
+      reaction, user = await self.client.wait_for('reaction_add', check=check)
+      if (reaction.emoji) == '👍':
+        await ctx.send('👍')
+      else:
+        await ctx.send('👍 emoji not '+reaction.emoji)
 
 
 def setup(client):

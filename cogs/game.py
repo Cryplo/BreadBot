@@ -435,6 +435,10 @@ class Game(commands.Cog):
           embed = discord.Embed(title=ctx.author.name+"'s fourth tier chest has been opened!",description="It contains:\n**"+list(chest_cards.keys())[0]+"**: "+list(chest_cards.values())[0]+"\n**"+list(chest_cards.keys())[1]+"**: "+list(chest_cards.values())[1]+"\n**"+list(chest_cards.keys())[2]+"**: "+list(chest_cards.values())[2]+"\n**"+list(chest_cards.keys())[3]+"**: "+list(chest_cards.values())[3])
           await db_set(ctx.author.id,"chests.4th",chests["4th"]-1)
           await ctx.send(embed=embed)
+    @open_chest.error
+    async def open_error(self, ctx, error):
+      if isinstance(error, commands.MissingRequiredArgument):
+        await ctx.send('you dumb lol')
     @commands.command(name="chests")
     async def show_chests(self,ctx):
       await initCommand(ctx)
@@ -443,10 +447,13 @@ class Game(commands.Cog):
     @commands.command(name="hourly")
     async def claim_hourly(self,ctx):
       await initCommand(ctx)
+      global grain
       if time.time() - hourly_cooldown > 3600:
         await db_set(ctx.author.id,"hourly_cooldown",time.time())
         await db_set(ctx.author.id,"chests.5th",chests["5th"]+1)
-        embed= discord.Embed(title=ctx.author.name+"'s' hourly rewards:", description = "A 5th Tier Chest")
+        grain += 500
+        await db_set(ctx.author.id,"grain",grain)
+        embed= discord.Embed(title=ctx.author.name+"'s hourly rewards:", description = "A 5th Tier Chest\n500 grain")
         await ctx.send(embed = embed)
       else:
         delay_left = 3600 - (time.time() - hourly_cooldown)
@@ -457,10 +464,13 @@ class Game(commands.Cog):
     @commands.command(name="daily")
     async def claim_daily(self,ctx):
       await initCommand(ctx)
+      global grain
       if time.time() - daily_cooldown > 86400:
         await db_set(ctx.author.id,"daily_cooldown",time.time())
         await db_set(ctx.author.id,"chests.4th",chests["4th"]+1)
-        embed= discord.Embed(title=ctx.author.name+"'s' hourly rewards:", description = "A 4th Tier Chest")
+        grain += 2500
+        await db_set(ctx.author.id,"grain",grain)
+        embed= discord.Embed(title=ctx.author.name+"'s daily rewards:", description = "A 4th Tier Chest\n2500 grain")
         await ctx.send(embed = embed)
       else:
         delay_left = 86400 - (time.time() - daily_cooldown)
@@ -503,6 +513,8 @@ class Game(commands.Cog):
           description=sending_string,
           colour=0x0dff00)
       await ctx.send(embed=embed)
+
+
         
 
 def setup(client):

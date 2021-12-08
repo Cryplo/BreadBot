@@ -26,21 +26,20 @@ cluster = pymongo.MongoClient(os.getenv('CONNECTION_URL'))
 database = cluster["UserData"]
 collection = database["UserData"]
 
-client = commands.Bot(command_prefix='.bread ')
+client = commands.Bot(command_prefix='.b ')
 
 
 @client.event
 async def on_ready():
     print('We have logged in as {0.user}'.format(client))
-    await client.change_presence(status=discord.Status.idle, activity=discord.Game('.bread help'))
-    prefix = '.bread'
+    await client.change_presence(status=discord.Status.idle, activity=discord.Game('.b help'))
 
 
 @client.event
 async def on_guild_join(guild):
     await client.change_presence(status=discord.Status.idle,
-                                 activity=discord.Game('.bread help; In ' + str(len(client.guilds)) + ' servers'))
-    prefix = '.bread'
+                                 activity=discord.Game('.b help; In ' + str(len(client.guilds)) + ' servers'))
+
 
 
 client.load_extension("cogs.misc")
