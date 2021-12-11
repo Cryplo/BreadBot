@@ -2,6 +2,8 @@ import discord
 from discord.ext import commands
 import random
 import config
+from discord.ui import *
+
 
 
 class Misc(commands.Cog):
@@ -62,6 +64,23 @@ class Misc(commands.Cog):
         await ctx.send('👍')
       else:
         await ctx.send('👍 emoji not '+reaction.emoji)
+
+    @commands.command(name="button")
+    async def btn_cmd(self,ctx):
+      async def button_callback(interaction):
+        await interaction.response.send_message("Hi!", ephemeral = True)
+        button1.disabled = True
+      view = View()
+      button1 = Button(
+        label = "Button",
+        style= discord.ButtonStyle.green,
+        custom_id = "button1"
+        )
+      button1.callback = button_callback
+      view.add_item(button1)
+      await ctx.send("Hi", view = view)
+
+      
 
 
 def setup(client):
