@@ -7,7 +7,7 @@ from discord.ext import commands
 from collections import OrderedDict
 from operator import getitem
 import config
-
+from functions import *
 import sys
 from discord.ui import Button, View
 import asyncio
