@@ -67,15 +67,15 @@ class Misc(commands.Cog):
 
     @commands.command(name="button")
     async def btn_cmd(self,ctx):
-      async def button_callback(interaction):
-        await interaction.response.send_message("Hi!", ephemeral = True)
-        button1.disabled = True
       view = View()
       button1 = Button(
         label = "Button",
         style= discord.ButtonStyle.green,
         custom_id = "button1"
         )
+      async def button_callback(interaction):
+        await interaction.response.send_message("Hi!", ephemeral = True, view = view)
+      
       button1.callback = button_callback
       view.add_item(button1)
       await ctx.send("Hi", view = view)

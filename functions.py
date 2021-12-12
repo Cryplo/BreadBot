@@ -1,3 +1,4 @@
+
 import os
 
 import pymongo
@@ -21,6 +22,3 @@ def convert(seconds):
 def count_duplicates(x, array):
     x = x + "[" + str(array[x]) + "]"
     return x
-
-
-

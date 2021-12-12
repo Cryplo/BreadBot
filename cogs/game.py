@@ -7,10 +7,12 @@ from discord.ext import commands
 from collections import OrderedDict
 from operator import getitem
 import config
-from functions import *
+
 import sys
 from discord.ui import Button, View
 import asyncio
+
+
 
 
 pantry_limit = config.pantry_limit
@@ -22,10 +24,8 @@ updateLog = config.updateLog
 helpContent = config.helpContent
 faqContent = config.faqContent
 bakePercents = config.bake_percents
-global users
-users=[]
-class MyError(Exception):
-    pass
+
+
 async def db_push(id, key, value):
     collection.update_one({"_id": id}, {"$push": {key: value}})
 
@@ -40,7 +40,7 @@ async def initCommand(ctx):
     global collection
     global database
     global cluster
-    await asyncio.sleep(0.2)
+    await asyncio.sleep(0.1)
     cluster = pymongo.MongoClient(os.getenv('CONNECTION_URL'))
     database = cluster["UserData"]
     collection = database["UserData"]
@@ -124,7 +124,6 @@ async def initCommand(ctx):
     simplified_rare_pantry = set(rare_pantry)
     simplified_mythical_pantry = set(mythical_pantry)
     simplified_legendary_pantry = set(legendary_pantry)
-
 
 class Game(commands.Cog):
     """Core Game"""
@@ -499,7 +498,7 @@ class Game(commands.Cog):
             colour=0xff1100)
         await ctx.send(embed=embed)
       
-    @commands.command(name="leaderboard")
+    @commands.command(name="leaderboard", aliases=["lb"])
     async def leaderboard(self,ctx):
       global common_pantry
       global rare_pantry
@@ -554,17 +553,17 @@ class Game(commands.Cog):
       view = View()
       buttonBakery = Button(
         label = "Bakery",
-        style= discord.ButtonStyle.green,
+        style= discord.ButtonStyle.primary,
         custom_id = "bakery"
         )
       buttonForest = Button(
         label = "Forest",
-        style= discord.ButtonStyle.green,
+        style= discord.ButtonStyle.primary,
         custom_id = "forest"
         )
       buttonAir = Button(
         label = "Air",
-        style= discord.ButtonStyle.green,
+        style= discord.ButtonStyle.primary,
         custom_id = "air"
         )
       view.add_item(buttonBakery)
@@ -573,12 +572,16 @@ class Game(commands.Cog):
 
       async def bakery_callback(interaction):
         global grain
+        if interaction.user.id != ctx.author.id:
+            return
         caughtChance = random.randint(1,10)
         if caughtChance < 10:
           forage_grain = random.randint(30,50)
+          
           await interaction.response.edit_message(content = 'You found '+str(forage_grain)+" grain in the bakery",view = None)
           grain += forage_grain
           await db_set(ctx.author.id,"grain",grain)
+        
         else:
           await interaction.response.edit_message(content ="You got caught by the chef. L",view = None)
 
@@ -586,13 +589,17 @@ class Game(commands.Cog):
       async def forest_callback(interaction):
         global grain
         forage_grain = random.randint(20,40)
-        await interaction.edit.send_message(content ='You found '+str(forage_grain)+" grain",view = None)
+        if interaction.user.id != ctx.author.id:
+          return
+        await interaction.response.edit_message(content ='You found '+str(forage_grain)+" grain",view = None)
         grain += forage_grain
         await db_set(ctx.author.id,"grain",grain)
         
         
       async def air_callback(interaction):
         global grain
+        if interaction.user.id != ctx.author.id:
+          return
         await interaction.response.edit_message(content ="You found nothing. It's air after all what were you expecting to find lol.",view = None)
 
         
