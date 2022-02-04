@@ -20,6 +20,20 @@ updateLog, helpContent, faqContent = map(read_misc_file, misc_paths)
 
 bread_paths = ['text_files/bread_data/common_bread.txt', 'text_files/bread_data/rare_bread.txt',
                'text_files/bread_data/mythical_bread.txt', 'text_files/bread_data/legendary_bread.txt']
+
+
+
+with open("text_files/farmer_names.txt") as file:
+    lines = file.readlines()
+    lines = [line.rstrip() for line in lines]
+    new_lines = []
+    for x in range(0,len(lines)):
+      word = lines[x].lower()
+      word = word.title
+      new_lines.append(word)
+    first_names = new_lines
+print("Config Done")
+
 # Does the same thing, but sets the variables equal to lists instead of strings
 common_bread, rare_bread, mythical_bread, legendary_bread = map(bread_file_to_list, bread_paths)
 

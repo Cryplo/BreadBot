@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 import random
 import config
-from discord.ui import *
+from discord.ui import Button, View, Select
 
 
 
@@ -79,6 +79,15 @@ class Misc(commands.Cog):
       button1.callback = button_callback
       view.add_item(button1)
       await ctx.send("Hi", view = view)
+   
+    @commands.command(name="select")
+    async def select_test(self,ctx):
+      view = View()
+      
+      options = [SelectOption(label="1"),SelectOption(label="2")]
+      dropdown = Select(options=options)
+      view.add_item(dropdown)
+      await ctx.send("hi", view=view)
 
       
 

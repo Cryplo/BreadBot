@@ -1,5 +1,14 @@
 # NOTES: ADD A SPACE INFRONT OF EACH COMMAND
 #pip install -U git+https://github.com/Pycord-Development/pycord
+
+import subprocess
+import sys
+
+def install(package):
+    subprocess.call([sys.executable, "-m", "pip", "install", package])
+
+install("git+https://github.com/Pycord-Development/pycord")
+
 import discord
 import discord.utils
 from discord.ext import commands
@@ -8,6 +17,7 @@ import config
 # from commands import update_log
 from functions import *
 from keep_alive import keep_alive
+
 
 
 prefix = '.bread'
@@ -46,6 +56,9 @@ async def on_guild_join(guild):
 client.load_extension("cogs.misc")
 client.load_extension("cogs.game")
 client.load_extension("cogs.battle")
+client.load_extension("cogs.farmers")
+
+
 
 keep_alive()
 
