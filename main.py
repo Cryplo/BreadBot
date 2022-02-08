@@ -55,8 +55,7 @@ async def on_guild_join(guild):
 
 client.load_extension("cogs.misc")
 client.load_extension("cogs.game")
-client.load_extension("cogs.battle")
-client.load_extension("cogs.farmers")
+
 
 
 

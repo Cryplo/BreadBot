@@ -47,7 +47,7 @@ async def initCommand(ctx):
     myquery = {"_id": ctx.author.id}
     user = collection.find(myquery)
     if (collection.count_documents(myquery) == 0):
-        post = {"_id": ctx.author.id, "pantry": [], "card_cooldown": 0, "grain": int(0), "farm_cooldown": 0,
+        post = {"_id": ctx.author.id, "pantry": [], "card_cooldown": 0, "grain": 0, "farm_cooldown": 0,
                 "name": ctx.author.name, "quest": [], "quest_cooldown": 0}
         collection.insert_one(post)
     global common_pantry
@@ -75,7 +75,7 @@ async def initCommand(ctx):
       pantry = result["pantry"]
       card_cooldown = result["card_cooldown"]
       farm_cooldown = result["farm_cooldown"]
-      grain = int(result["grain"])
+      grain = result["grain"]
       
       if "quest" in document.keys():
           # for result in user:
