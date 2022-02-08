@@ -23,7 +23,6 @@ from keep_alive import keep_alive
 prefix = '.bread'
 madlibs = {}
 collectors = []
-pantry_limit = config.pantry_limit
 common_bread = config.common_bread
 rare_bread = config.rare_bread
 mythical_bread = config.mythical_bread
