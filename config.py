@@ -37,7 +37,7 @@ print("Config Done")
 # Does the same thing, but sets the variables equal to lists instead of strings
 common_bread, rare_bread, mythical_bread, legendary_bread = map(bread_file_to_list, bread_paths)
 
-pantry_limit = 1000
+
 bake_cooldown = 600
 #Make sure adds up to 1,000
 bake_percents = [600,350,47,3]

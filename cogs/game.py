@@ -15,7 +15,7 @@ import asyncio
 
 
 
-pantry_limit = config.pantry_limit
+
 common_bread = config.common_bread
 rare_bread = config.rare_bread
 mythical_bread = config.mythical_bread
@@ -135,7 +135,7 @@ class Game(commands.Cog):
     async def bake(self, ctx):
         await initCommand(ctx)
         # Checks to make sure baking meets requirements
-        if time.time() - card_cooldown > config.bake_cooldown and len(pantry) < pantry_limit:
+        if time.time() - card_cooldown > config.bake_cooldown:
             await db_set(ctx.author.id, "card_cooldown", time.time())
             ran_card_category = random.randint(1, 1000)
             # Common Card Baked
@@ -235,7 +235,7 @@ class Game(commands.Cog):
         embed = discord.Embed(title=viewing_user.name + "'s pantry:", description=pantry_shown, colour=0x000000)
         embed.set_footer(text='Cards sell value: ' + str(
             len(common_pantry) * 500 + len(rare_pantry) * 2500 + len(mythical_pantry) * 6000 + len(
-                legendary_pantry) * 20000) + ' grain' + " | Size: " + str(len(pantry)) + "/" + str(pantry_limit))
+                legendary_pantry) * 20000) + ' grain' + " | Size: " + str(len(pantry)))
         await ctx.send(embed=embed)
 
     @commands.command(name="grain")
@@ -318,7 +318,7 @@ class Game(commands.Cog):
         global grain
         for result in user:
             grain = int(result["grain"])
-        if buying_card in common_bread and grain >= 1000 and len(pantry) < pantry_limit:
+        if buying_card in common_bread and grain >= 1000 and len(pantry):
             grain = grain - 1000
             card = buying_card
             embed = discord.Embed(
@@ -328,7 +328,7 @@ class Game(commands.Cog):
             collection.update_one({"_id": ctx.author.id}, {"$push": {"pantry": card}})
             collection.update_one({"_id": ctx.author.id}, {"$set": {"grain": grain}})
             
-        elif buying_card in rare_bread and grain >= 5000 and len(pantry) < pantry_limit:
+        elif buying_card in rare_bread and grain >= 5000:
             card = buying_card
             grain = grain - 5000
             embed = discord.Embed(
@@ -339,7 +339,7 @@ class Game(commands.Cog):
             collection.update_one({"_id": ctx.author.id}, {"$set": {"grain": grain}})
             
 
-        elif buying_card in mythical_bread and grain >= 12000 and len(pantry) < pantry_limit:
+        elif buying_card in mythical_bread and grain >= 12000:
             card = buying_card
             grain = grain - 12000
 
@@ -352,7 +352,7 @@ class Game(commands.Cog):
 
             
 
-        elif buying_card in legendary_bread and grain >= 40000 and len(pantry) < pantry_limit:
+        elif buying_card in legendary_bread and grain >= 40000:
             card = buying_card
             grain = grain - 40000
 
@@ -370,9 +370,6 @@ class Game(commands.Cog):
             embed.set_footer(text="To check all cards, type .bread cards")
             await ctx.send(embed=embed)
 
-        elif len(pantry) >= pantry_limit:
-            embed = discord.Embed(description="You have don't have any more room left in your pantry", colour=0xff1100)
-            await ctx.send(embed=embed)
 
         else:
             embed = discord.Embed(description="You don't have enough grain", colour=0xff1100)
