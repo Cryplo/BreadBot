@@ -69,6 +69,7 @@ async def initCommand(ctx):
     global hourly_cooldown
     global daily_cooldown
     global forage_cooldown
+    global rob_cooldown
     collection.update_one({"_id": ctx.author.id}, {"$set": {"name": ctx.author.name}})
     document = collection.find_one(myquery)
     for result in user:
@@ -106,6 +107,10 @@ async def initCommand(ctx):
       if "forage_cooldown" not in document.keys():
           collection.update_one({"_id": ctx.author.id}, {"$set": {"forage_cooldown": 0}})
           forage_cooldown = 0
+      if "rob_cooldown" not in document.keys():
+          collection.update_one({"_id": ctx.author.id},{"$set": {"rob_cooldown":0}})
+      rob_cooldown = result["rob_cooldown"]
+      
     common_pantry = []
     rare_pantry = []
     mythical_pantry = []
@@ -383,7 +388,7 @@ class Game(commands.Cog):
             coin = random.randint(1, 100)
             if coin <= 60:
                 gambling = int(gambling)
-                gambling = gambling * (random.randint(50, 100) / 100)
+                gambling = gambling * (random.randint(30, 80) / 100)
                 gambling = math.floor(gambling)
 
                 collection.update_one({"_id": ctx.author.id}, {"$set": {"grain": grain + gambling}})
@@ -729,7 +734,35 @@ class Game(commands.Cog):
 
       await ctx.send('Where do you want to forage?',view=view)
       view.clear_items()
-    
+    #add cooldown lmfao
+
+    @commands.command(name="rob")
+    async def robbing(self, ctx, member: discord.Member):
+      await initCommand(ctx)
+      if time.time() - rob_cooldown < 600:
+        await ctx.send("You have to wait "+ convert(600 - (time.time() - rob_cooldown)))
+        return
+      global grain
+      myquery = {"_id": member.id}
+      other_user = collection.find(myquery)
+      for result in other_user:
+        other_grain = result["grain"]
+      coin = random.randint(1,2)
+      if other_grain < grain:
+        steal_grain = random.randint(0, other_grain//2)
+      else:
+        steal_grain = random.randint(0, grain//2)
+      
+      if coin == 1:
+        await db_set(ctx.author.id, "grain", grain + steal_grain)
+        await db_set(member.id, "grain", other_grain - steal_grain)
+        await ctx.send("You stole "+str(steal_grain)+"!")
+      
+      if coin == 2:
+        await db_set(ctx.author.id, "grain", grain - steal_grain)
+        await db_set(member.id, "grain", other_grain + steal_grain)
+        await ctx.send("You got caught and paid "+str(steal_grain)+"!")
+      await db_set(ctx.author.id, "rob_cooldown", time.time())
 
 
 
@@ -739,3 +772,4 @@ class Game(commands.Cog):
 
 def setup(client):
     client.add_cog(Game(client))
+
