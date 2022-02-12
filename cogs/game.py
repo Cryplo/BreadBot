@@ -73,10 +73,7 @@ async def initCommand(ctx):
     collection.update_one({"_id": ctx.author.id}, {"$set": {"name": ctx.author.name}})
     document = collection.find_one(myquery)
     for result in user:
-      pantry = result["pantry"]
-      card_cooldown = result["card_cooldown"]
-      farm_cooldown = result["farm_cooldown"]
-      grain = result["grain"]
+      
       
       if "quest" in document.keys():
           # for result in user:
@@ -109,6 +106,11 @@ async def initCommand(ctx):
           forage_cooldown = 0
       if "rob_cooldown" not in document.keys():
           collection.update_one({"_id": ctx.author.id},{"$set": {"rob_cooldown":0}})
+          
+      pantry = result["pantry"]
+      card_cooldown = result["card_cooldown"]
+      farm_cooldown = result["farm_cooldown"]
+      grain = result["grain"]
       rob_cooldown = result["rob_cooldown"]
       
     common_pantry = []
@@ -748,21 +750,43 @@ class Game(commands.Cog):
       for result in other_user:
         other_grain = result["grain"]
       coin = random.randint(1,2)
-      if other_grain < grain:
-        steal_grain = random.randint(0, other_grain//2)
-      else:
-        steal_grain = random.randint(0, grain//2)
+
+        
       
       if coin == 1:
+        steal_grain = random.randint(0, other_grain//5)
         await db_set(ctx.author.id, "grain", grain + steal_grain)
         await db_set(member.id, "grain", other_grain - steal_grain)
         await ctx.send("You stole "+str(steal_grain)+"!")
       
       if coin == 2:
+        steal_grain = random.randint(0, grain//5)
         await db_set(ctx.author.id, "grain", grain - steal_grain)
         await db_set(member.id, "grain", other_grain + steal_grain)
         await ctx.send("You got caught and paid "+str(steal_grain)+"!")
       await db_set(ctx.author.id, "rob_cooldown", time.time())
+    
+    @commands.command(name = "give")
+    async def giving(self, ctx, member:discord.Member, amount):
+      await initCommand(ctx)
+      if(member.id  == ctx.author.id):
+        await ctx.send("You can't share to yourself!")
+        return
+      if( not (amount.isdigit())):
+        await ctx.send("You have to enter a non-negative integer to share")
+        return
+      global grain
+      amount = int(amount)
+      if(amount > grain):
+        await ctx.send("You don't have enough to share")
+        return
+      myquery = {"_id": member.id}
+      other_user = collection.find(myquery)
+      for result in other_user:
+        other_grain = result["grain"]
+      await db_set(ctx.author.id, "grain", grain - amount)
+      await db_set(member.id, "grain", other_grain + amount)
+      await ctx.send("You shared "+ str(amount)+"!")
 
 
 
